@@ -4,7 +4,7 @@
   "title": "Trance",
   "description": "Ambient sound mixer for focus and relaxation. Layer multiple sounds, save presets, and control from your menu bar.",
   "icon": "icon.png",
-  "author": "chandler",
+  "author": "chandlervdw",
   "categories": ["Productivity", "Media"],
   "license": "MIT",
   "platforms": ["macOS"],
