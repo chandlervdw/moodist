@@ -27,3 +27,7 @@ Ambient sound mixer for Raycast. Layer nature, urban, and electronic sounds to c
 - **Urban** — Coffee Shop, City Street, Train, Keyboard Typing, Clock Ticking
 - **Electronic** — White Noise, Pink Noise, Brown Noise, Deep Space
 - **Binaural** — Alpha Waves, Beta Waves, Theta Waves, Delta Waves
+
+## Sound Credits
+
+All ambient sounds are copyright-free and sourced from the [Moodist](https://github.com/remvze/moodist) project, available under the [Pixabay Content License](https://pixabay.com/service/license-summary/). Binaural beats are generated programmatically. All sounds are free for personal and commercial use with no attribution required.
