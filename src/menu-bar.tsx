@@ -66,7 +66,7 @@ export default function MenuBarCommand() {
       <MenuBarExtra.Item
         title={state.isPlaying ? "Pause" : "Play"}
         icon={state.isPlaying ? Icon.Pause : Icon.Play}
-        shortcut={{ modifiers: ["cmd"], key: "p" }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
         onAction={async () => {
           if (!state.isPlaying && state.activeSounds.length === 0) {
             await launchCommand({ name: "mix-sounds", type: LaunchType.UserInitiated });

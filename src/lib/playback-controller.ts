@@ -92,10 +92,10 @@ export async function addSound(soundId: string, volume: number): Promise<Playbac
   } else {
     state.activeSounds.push({ soundId, volume });
   }
+  // Auto-play when adding sounds
+  state.isPlaying = true;
   await setPlaybackState(state);
-  if (state.isPlaying) {
-    await reconcile();
-  }
+  await reconcile();
   return state;
 }
 

@@ -61,7 +61,7 @@ export class AudioEngine {
 
   startSound(soundId: string, filePath: string, volume: number): number | null {
     if (!fs.existsSync(filePath)) {
-      console.error(`Sound file not found: ${filePath}`);
+      console.error(`[AudioEngine] Sound file not found: ${filePath}`);
       return null;
     }
 
@@ -72,10 +72,9 @@ export class AudioEngine {
     });
 
     if (!child.pid) {
-      console.error(`Failed to spawn afplay for ${soundId}`);
+      console.error(`[AudioEngine] Failed to spawn afplay for ${soundId}`);
       return null;
     }
-
     child.unref();
 
     // Register PID

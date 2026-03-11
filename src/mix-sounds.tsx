@@ -72,7 +72,7 @@ export default function MixSoundsCommand() {
                       <Action
                         title={state.isPlaying ? "Pause All" : "Play All"}
                         icon={state.isPlaying ? Icon.Pause : Icon.Play}
-                        shortcut={{ modifiers: ["cmd"], key: "p" }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                         onAction={async () => {
                           if (!state.isPlaying && state.activeSounds.length === 0) {
                             await showToast({
