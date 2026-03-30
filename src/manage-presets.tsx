@@ -6,6 +6,8 @@ import {
   confirmAlert,
   Form,
   Icon,
+  launchCommand,
+  LaunchType,
   List,
   showToast,
   Toast,
@@ -77,45 +79,37 @@ export default function ManagePresetsCommand() {
   const { state, loadPreset } = usePlayback();
   const { push } = useNavigation();
 
+  const hasActiveSounds = state.activeSounds.length > 0;
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search presets..." navigationTitle="Presets">
-      <List.Section title="Actions">
-        <List.Item
-          title="Save Current Mix as Preset"
-          icon={{ source: Icon.Plus, tintColor: Color.Blue }}
-          subtitle={
-            state.activeSounds.length > 0
-              ? `${state.activeSounds.length} sound${state.activeSounds.length !== 1 ? "s" : ""} in mix`
-              : "No sounds in mix"
-          }
-          actions={
-            <ActionPanel>
-              <Action
-                title="Save Current Mix"
-                icon={Icon.SaveDocument}
-                onAction={async () => {
-                  if (state.activeSounds.length === 0) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "No sounds in mix",
-                      message: "Add sounds in Mix Sounds first",
-                    });
-                    return;
-                  }
-                  push(
-                    <SavePresetForm
-                      onSave={async (name) => {
-                        await save(name, state.activeSounds, state.masterVolume);
-                        await showToast({ style: Toast.Style.Success, title: `Saved "${name}"` });
-                      }}
-                    />,
-                  );
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
+      {hasActiveSounds && (
+        <List.Section title="Actions">
+          <List.Item
+            title="Save Current Mix as Preset"
+            icon={{ source: Icon.Plus, tintColor: Color.Blue }}
+            subtitle={`${state.activeSounds.length} sound${state.activeSounds.length !== 1 ? "s" : ""} in mix`}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Save Current Mix"
+                  icon={Icon.SaveDocument}
+                  onAction={() => {
+                    push(
+                      <SavePresetForm
+                        onSave={async (name) => {
+                          await save(name, state.activeSounds, state.masterVolume);
+                          await showToast({ style: Toast.Style.Success, title: `Saved "${name}"` });
+                        }}
+                      />,
+                    );
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
 
       <List.Section title="Saved Presets" subtitle={`${presets.length} preset${presets.length !== 1 ? "s" : ""}`}>
         {presets.map((preset) => {
@@ -205,9 +199,26 @@ export default function ManagePresetsCommand() {
 
       {presets.length === 0 && !isLoading && (
         <List.EmptyView
-          title="No Presets Yet"
-          description="Add sounds in Mix Sounds, then save your mix here"
+          title={hasActiveSounds ? "No Presets Yet" : "No Mix Active"}
+          description={
+            hasActiveSounds
+              ? "Save your current mix as a preset above"
+              : "Add sounds in Mix Sounds, then save your mix here"
+          }
           icon={Icon.Music}
+          actions={
+            !hasActiveSounds ? (
+              <ActionPanel>
+                <Action
+                  title="Open Mixer"
+                  icon={Icon.AppWindowGrid3x3}
+                  onAction={async () => {
+                    await launchCommand({ name: "mix-sounds", type: LaunchType.UserInitiated });
+                  }}
+                />
+              </ActionPanel>
+            ) : undefined
+          }
         />
       )}
     </List>

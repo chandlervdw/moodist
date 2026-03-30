@@ -1,10 +1,11 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "trance",
-  "title": "Trance",
+  "name": "moodist",
+  "title": "Moodist",
   "description": "Ambient sound mixer for focus and relaxation. Layer multiple sounds, save presets, and control from your menu bar.",
   "icon": "icon.png",
   "author": "chandlervdw",
+  "contributors": ["pernielsentikaer"],
   "categories": ["Productivity", "Media"],
   "license": "MIT",
   "platforms": ["macOS"],
@@ -23,8 +24,8 @@
     },
     {
       "name": "menu-bar",
-      "title": "Trance Menu Bar",
-      "description": "Persistent menu bar controls for Trance",
+      "title": "Moodist Menu Bar",
+      "description": "Persistent menu bar controls for Moodist",
       "mode": "menu-bar",
       "interval": "30s"
     },
@@ -39,6 +40,13 @@
       "title": "Set Sleep Timer",
       "description": "Set an auto-stop timer for the current mix",
       "mode": "view"
+    },
+    {
+      "name": "keep-alive",
+      "title": "Keep Alive",
+      "description": "Restarts stopped sounds",
+      "mode": "no-view",
+      "interval": "20s"
     }
   ],
   "preferences": [
