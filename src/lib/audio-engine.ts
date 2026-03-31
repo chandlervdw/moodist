@@ -1,150 +1,72 @@
-import { spawn, execSync } from "child_process";
-import { environment } from "@raycast/api";
-import fs from "fs";
-import path from "path";
-import type { PidEntry, PidRegistry } from "../types";
-import { PID_REGISTRY_FILENAME } from "./constants";
+import type { RunningSound } from "../types";
+
+let swiftModule: {
+  startSound: (id: string, path: string, volume: number) => Promise<boolean>;
+  stopSound: (id: string) => Promise<boolean>;
+  stopAllSounds: () => Promise<boolean>;
+  setSoundVolume: (id: string, volume: number) => Promise<boolean>;
+  getActiveSounds: () => Promise<string[]>;
+} | null = null;
+
+async function getSwift() {
+  if (!swiftModule) {
+    swiftModule = await import("swift:../../swift/looper");
+  }
+  return swiftModule;
+}
 
 export class AudioEngine {
-  private registryPath: string;
-  private looperPath: string;
+  private volumeMap: Map<string, number> = new Map();
 
-  constructor(supportPath: string) {
-    this.registryPath = path.join(supportPath, PID_REGISTRY_FILENAME);
-    this.looperPath = path.join(environment.assetsPath, "looper");
-  }
-
-  // --- PID Registry ---
-
-  readRegistry(): PidRegistry {
-    try {
-      if (!fs.existsSync(this.registryPath)) {
-        return { entries: [], lastUpdated: Date.now() };
-      }
-      const raw = fs.readFileSync(this.registryPath, "utf-8");
-      return JSON.parse(raw) as PidRegistry;
-    } catch {
-      return { entries: [], lastUpdated: Date.now() };
-    }
-  }
-
-  private writeRegistry(registry: PidRegistry): void {
-    registry.lastUpdated = Date.now();
-    const dir = path.dirname(this.registryPath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    const tmp = this.registryPath + ".tmp";
-    fs.writeFileSync(tmp, JSON.stringify(registry, null, 2));
-    fs.renameSync(tmp, this.registryPath);
-  }
-
-  private isProcessAlive(pid: number): boolean {
-    try {
-      process.kill(pid, 0);
-      const comm = execSync(`ps -p ${pid} -o comm= 2>/dev/null`, { encoding: "utf-8" }).trim();
-      return comm.endsWith("looper");
-    } catch {
-      return false;
-    }
-  }
-
-  pruneStaleEntries(): PidEntry[] {
-    const registry = this.readRegistry();
-    const alive = registry.entries.filter((e) => this.isProcessAlive(e.pid));
-    if (alive.length !== registry.entries.length) {
-      this.writeRegistry({ ...registry, entries: alive });
-    }
-    return alive;
-  }
-
-  // --- Process Management ---
-
-  startSound(soundId: string, filePath: string, volume: number): number | null {
-    if (!fs.existsSync(filePath)) {
-      console.error(`[AudioEngine] Sound file not found: ${filePath}`);
-      return null;
-    }
-
+  async startSound(soundId: string, filePath: string, volume: number): Promise<boolean> {
+    const swift = await getSwift();
     const looperVolume = Math.max(0, Math.min(1, volume / 100));
-    const child = spawn(this.looperPath, [filePath, String(looperVolume)], {
-      detached: true,
-      stdio: "ignore",
-    });
-
-    if (!child.pid) {
-      console.error(`[AudioEngine] Failed to spawn looper for ${soundId}`);
-      return null;
+    const result = await swift.startSound(soundId, filePath, looperVolume);
+    if (result) {
+      this.volumeMap.set(soundId, volume);
     }
-    child.unref();
-
-    const registry = this.readRegistry();
-    registry.entries = registry.entries.filter((e) => e.soundId !== soundId);
-    registry.entries.push({
-      soundId,
-      pid: child.pid,
-      volume,
-      startedAt: Date.now(),
-    });
-    this.writeRegistry(registry);
-
-    return child.pid;
+    return result;
   }
 
-  stopSound(soundId: string): void {
-    const registry = this.readRegistry();
-    const entry = registry.entries.find((e) => e.soundId === soundId);
-    if (!entry) return;
-
-    try {
-      process.kill(entry.pid, "SIGTERM");
-    } catch {
-      // Process already dead
-    }
-
-    registry.entries = registry.entries.filter((e) => e.soundId !== soundId);
-    this.writeRegistry(registry);
+  async stopSound(soundId: string): Promise<void> {
+    const swift = await getSwift();
+    await swift.stopSound(soundId);
+    this.volumeMap.delete(soundId);
   }
 
-  stopAll(): void {
-    const registry = this.readRegistry();
-    for (const entry of registry.entries) {
-      try {
-        process.kill(entry.pid, "SIGTERM");
-      } catch {
-        // Process already dead
-      }
-    }
-    this.writeRegistry({ entries: [], lastUpdated: Date.now() });
+  async stopAll(): Promise<void> {
+    const swift = await getSwift();
+    await swift.stopAllSounds();
+    this.volumeMap.clear();
   }
 
-  changeVolume(soundId: string, filePath: string, newVolume: number): void {
-    const registry = this.readRegistry();
-    const entry = registry.entries.find((e) => e.soundId === soundId);
-
-    if (entry && this.isProcessAlive(entry.pid)) {
-      const newPid = this.startSound(soundId, filePath, newVolume);
-      if (newPid) {
-        try {
-          process.kill(entry.pid, "SIGTERM");
-        } catch {
-          // Already dead
-        }
-      }
+  async changeVolume(soundId: string, filePath: string, newVolume: number): Promise<void> {
+    const swift = await getSwift();
+    const looperVolume = Math.max(0, Math.min(1, newVolume / 100));
+    const updated = await swift.setSoundVolume(soundId, looperVolume);
+    if (updated) {
+      this.volumeMap.set(soundId, newVolume);
     } else {
-      this.startSound(soundId, filePath, newVolume);
+      await this.startSound(soundId, filePath, newVolume);
     }
   }
 
-  getRunningEntries(): PidEntry[] {
-    return this.pruneStaleEntries();
+  async getRunningEntries(): Promise<RunningSound[]> {
+    const swift = await getSwift();
+    const activeIds = await swift.getActiveSounds();
+    return activeIds.map((soundId) => ({
+      soundId,
+      volume: this.volumeMap.get(soundId) ?? 0,
+    }));
   }
 
-  isAnythingPlaying(): boolean {
-    return this.getRunningEntries().length > 0;
+  async isAnythingPlaying(): Promise<boolean> {
+    const entries = await this.getRunningEntries();
+    return entries.length > 0;
   }
 
-  getEntryForSound(soundId: string): PidEntry | undefined {
-    return this.getRunningEntries().find((e) => e.soundId === soundId);
+  async getEntryForSound(soundId: string): Promise<RunningSound | undefined> {
+    const entries = await this.getRunningEntries();
+    return entries.find((e) => e.soundId === soundId);
   }
 }

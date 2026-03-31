@@ -40,13 +40,6 @@
       "title": "Set Sleep Timer",
       "description": "Set an auto-stop timer for the current mix",
       "mode": "view"
-    },
-    {
-      "name": "keep-alive",
-      "title": "Keep Alive",
-      "description": "Restarts stopped sounds",
-      "mode": "no-view",
-      "interval": "20s"
     }
   ],
   "preferences": [

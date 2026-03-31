@@ -20,16 +20,9 @@ export interface PlaybackState {
   masterVolume: number; // 0-100
 }
 
-export interface PidEntry {
+export interface RunningSound {
   soundId: string;
-  pid: number;
   volume: number;
-  startedAt: number;
-}
-
-export interface PidRegistry {
-  entries: PidEntry[];
-  lastUpdated: number;
 }
 
 export interface Preset {

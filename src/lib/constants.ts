@@ -1,10 +1,8 @@
 export const STORAGE_KEYS = {
-  PLAYBACK_STATE: "trance-playback-state",
-  PRESETS: "trance-presets",
-  TIMER: "trance-timer",
+  PLAYBACK_STATE: "moodist-playback-state",
+  PRESETS: "moodist-presets",
+  TIMER: "moodist-timer",
 } as const;
-
-export const PID_REGISTRY_FILENAME = "pid-registry.json";
 
 export const DEFAULT_VOLUME = 75;
 export const VOLUME_PRESETS = [10, 25, 50, 75, 100] as const;
