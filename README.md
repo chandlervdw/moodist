@@ -1,4 +1,4 @@
-# Moodist
+# Moodist Raycast Extension
 
 Ambient sound mixer for Raycast. Layer nature, urban, and electronic sounds to create your perfect focus or relaxation environment.
 
