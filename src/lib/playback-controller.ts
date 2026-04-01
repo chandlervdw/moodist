@@ -1,3 +1,4 @@
+import { environment } from "@raycast/api";
 import { AudioEngine } from "./audio-engine";
 import { getPlaybackState, setPlaybackState } from "./playback-state";
 import { getSoundById, getSoundFilePath } from "./sound-library";
@@ -7,7 +8,7 @@ let engineInstance: AudioEngine | null = null;
 
 function getEngine(): AudioEngine {
   if (!engineInstance) {
-    engineInstance = new AudioEngine();
+    engineInstance = new AudioEngine(environment.supportPath);
   }
   return engineInstance;
 }
