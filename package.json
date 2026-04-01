@@ -40,6 +40,14 @@
       "title": "Set Sleep Timer",
       "description": "Set an auto-stop timer for the current mix",
       "mode": "view"
+    },
+    {
+      "name": "keep-alive",
+      "title": "Keep Alive",
+      "description": "Background task that restarts sounds if they stop unexpectedly",
+      "mode": "no-view",
+      "interval": "20s",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
@@ -74,7 +82,9 @@
     "typescript": "^5.8.0"
   },
   "scripts": {
+    "prebuild": "cd swift/looper && swift build -c release && cp .build/release/looper ../../assets/looper",
     "build": "ray build",
+    "predev": "cd swift/looper && swift build -c release && cp .build/release/looper ../../assets/looper",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

@@ -7,17 +7,7 @@ let package = Package(
   platforms: [
     .macOS(.v12)
   ],
-  dependencies: [
-    .package(url: "https://github.com/raycast/extensions-swift-tools", from: "1.0.4")
-  ],
   targets: [
-    .executableTarget(
-      name: "looper",
-      dependencies: [
-        .product(name: "RaycastSwiftMacros", package: "extensions-swift-tools"),
-        .product(name: "RaycastSwiftPlugin", package: "extensions-swift-tools"),
-        .product(name: "RaycastTypeScriptPlugin", package: "extensions-swift-tools"),
-      ]
-    )
+    .executableTarget(name: "looper", path: "Sources"),
   ]
 )
