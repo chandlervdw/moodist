@@ -28,6 +28,8 @@ declare namespace Preferences {
   export type ManagePresets = ExtensionPreferences & {}
   /** Preferences accessible in the `set-timer` command */
   export type SetTimer = ExtensionPreferences & {}
+  /** Preferences accessible in the `stop-all` command */
+  export type StopAll = ExtensionPreferences & {}
   /** Preferences accessible in the `keep-alive` command */
   export type KeepAlive = ExtensionPreferences & {}
 }
@@ -43,6 +45,8 @@ declare namespace Arguments {
   export type ManagePresets = {}
   /** Arguments passed to the `set-timer` command */
   export type SetTimer = {}
+  /** Arguments passed to the `stop-all` command */
+  export type StopAll = {}
   /** Arguments passed to the `keep-alive` command */
   export type KeepAlive = {}
 }
