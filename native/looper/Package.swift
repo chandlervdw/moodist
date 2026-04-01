@@ -8,6 +8,6 @@ let package = Package(
     .macOS(.v12)
   ],
   targets: [
-    .executableTarget(name: "looper", path: "Sources"),
+    .executableTarget(name: "looper", path: "Sources")
   ]
 )
